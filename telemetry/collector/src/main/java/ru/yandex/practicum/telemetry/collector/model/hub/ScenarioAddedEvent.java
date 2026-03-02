@@ -10,11 +10,10 @@ import java.util.List;
 
 @Getter
 @Setter
-@NotNull
 @ToString(callSuper = true)
 public class ScenarioAddedEvent extends HubEvent {
     @NotBlank
-    String name;
+    private String name;
 
     @NotNull
     private List<ScenarioCondition> conditions;

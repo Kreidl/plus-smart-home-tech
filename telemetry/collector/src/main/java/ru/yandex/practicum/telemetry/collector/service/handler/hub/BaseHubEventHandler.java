@@ -13,7 +13,7 @@ import ru.yandex.practicum.telemetry.collector.model.hub.HubEventType;
 @AllArgsConstructor
 public abstract class BaseHubEventHandler<T> implements HubEventHandler {
     private final KafkaProducerConfig kafkaProducerConfig;
-    KafkaProducer<String, HubEventAvro> kafkaProducer;
+    private KafkaProducer<String, HubEventAvro> kafkaProducer;
 
     public BaseHubEventHandler(KafkaProducerConfig kafkaProducerConfig) {
         this.kafkaProducerConfig = kafkaProducerConfig;

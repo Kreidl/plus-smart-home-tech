@@ -13,7 +13,7 @@ import ru.yandex.practicum.telemetry.collector.model.sensor.SensorEventType;
 @AllArgsConstructor
 public abstract class BaseSensorEventHandler<T> implements SensorEventHandler {
     private final KafkaProducerConfig kafkaProducerConfig;
-    KafkaProducer<String, SensorEventAvro> kafkaProducer;
+    private KafkaProducer<String, SensorEventAvro> kafkaProducer;
 
     public BaseSensorEventHandler(KafkaProducerConfig kafkaProducerConfig) {
         this.kafkaProducerConfig = kafkaProducerConfig;

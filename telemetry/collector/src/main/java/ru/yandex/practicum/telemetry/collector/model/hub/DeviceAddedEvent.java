@@ -8,7 +8,6 @@ import lombok.ToString;
 
 @Getter
 @Setter
-@NotNull
 @ToString(callSuper = true)
 public class DeviceAddedEvent extends HubEvent {
     @NotBlank
