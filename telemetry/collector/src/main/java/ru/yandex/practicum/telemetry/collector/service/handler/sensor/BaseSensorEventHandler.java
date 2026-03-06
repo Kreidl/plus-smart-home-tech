@@ -32,6 +32,8 @@ public abstract class BaseSensorEventHandler<T> implements SensorEventHandler {
 
     @Override
     public void handle(SensorEventProto sensorEventProto) {
+        log.info("Start of converting SensorEventProto with MessageType {} to Avro",
+                getMessageTypeProto());
         T eventAvro = protoToAvro(sensorEventProto);
         Instant timestamp = Instant.ofEpochSecond(sensorEventProto.getTimestamp().getSeconds(),
                 sensorEventProto.getTimestamp().getNanos());
@@ -41,6 +43,8 @@ public abstract class BaseSensorEventHandler<T> implements SensorEventHandler {
                 .setTimestamp(timestamp)
                 .setPayload(eventAvro)
                 .build();
+        log.info("End of converting SensorEventProto with MessageType {} to Avro {}",
+                getMessageTypeProto(), sensorEventAvro);
         ProducerRecord<String, SensorEventAvro> record = new ProducerRecord<>(kafkaProducerConfig.sensorTopic(),
                 sensorEventProto.getHubId(), sensorEventAvro);
         kafkaProducer.send(record, (metadata, exception) -> {

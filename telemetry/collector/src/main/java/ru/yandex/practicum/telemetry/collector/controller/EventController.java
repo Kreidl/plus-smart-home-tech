@@ -22,14 +22,14 @@ import java.util.stream.Collectors;
 @Slf4j
 @GrpcService
 public class EventController extends CollectorControllerGrpc.CollectorControllerImplBase {
-    private final Map<SensorEventType, SensorEventHandler> sensorEventHandlers;
-    private final Map<HubEventType, HubEventHandler> hubEventHandlers;
+    private final Map<SensorEventProto.PayloadCase, SensorEventHandler> sensorEventHandlers;
+    private final Map<HubEventProto.PayloadCase, HubEventHandler> hubEventHandlers;
 
     public EventController(Set<SensorEventHandler> sensorEventHandlers, Set<HubEventHandler> hubEventHandlers) {
         this.sensorEventHandlers = sensorEventHandlers.stream()
-                .collect(Collectors.toMap(SensorEventHandler::getMessageType, Function.identity()));
+                .collect(Collectors.toMap(SensorEventHandler::getMessageTypeProto, Function.identity()));
         this.hubEventHandlers = hubEventHandlers.stream()
-                .collect(Collectors.toMap(HubEventHandler::getMessageType, Function.identity()));
+                .collect(Collectors.toMap(HubEventHandler::getMessageTypeProto, Function.identity()));
     }
 
     @Override

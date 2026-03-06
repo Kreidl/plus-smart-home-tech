@@ -7,7 +7,6 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import ru.yandex.practicum.grpc.telemetry.event.HubEventProto;
 import ru.yandex.practicum.kafka.telemetry.event.HubEventAvro;
 import ru.yandex.practicum.telemetry.collector.configuration.KafkaProducerConfig;
-import ru.yandex.practicum.telemetry.collector.model.hub.HubEvent;
 import ru.yandex.practicum.telemetry.collector.model.hub.HubEventType;
 
 import java.time.Instant;
@@ -30,6 +29,8 @@ public abstract class BaseHubEventHandler<T> implements HubEventHandler {
 
     @Override
     public void handle(HubEventProto hubEventProto) {
+        log.info("Start of converting HubEventProto with MessageType {} to Avro",
+                getMessageTypeProto());
         T eventAvro = protoToAvro(hubEventProto);
         Instant timestamp = Instant.ofEpochSecond(hubEventProto.getTimestamp().getSeconds(),
                 hubEventProto.getTimestamp().getNanos());
@@ -38,6 +39,8 @@ public abstract class BaseHubEventHandler<T> implements HubEventHandler {
                 .setTimestamp(timestamp)
                 .setPayload(eventAvro)
                 .build();
+        log.info("End of converting HubEventProto with MessageType {} to Avro {}",
+                getMessageTypeProto(), hubEventAvro);
         ProducerRecord<String, HubEventAvro> record = new ProducerRecord<>(kafkaProducerConfig.hubTopic(),
                 hubEventProto.getHubId(), hubEventAvro);
         kafkaProducer.send(record, (metadata, exception) -> {

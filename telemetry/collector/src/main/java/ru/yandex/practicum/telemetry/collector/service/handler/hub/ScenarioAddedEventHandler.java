@@ -35,7 +35,14 @@ public class ScenarioAddedEventHandler extends BaseHubEventHandler<ScenarioAdded
                             .setSensorId(scenarioCondition.getSensorId())
                             .setType(ConditionTypeAvro.valueOf(scenarioCondition.getType().name()))
                             .setOperation(ConditionOperationAvro.valueOf(scenarioCondition.getOperation().name()));
-                    builder.setValue(scenarioCondition.getValueCase());
+                    switch (scenarioCondition.getValueCase()) {
+                        case BOOL_VALUE:
+                            builder.setValue(scenarioCondition.getBoolValue() ? 1 : 0);
+                            break;
+                        case INT_VALUE:
+                            builder.setValue(scenarioCondition.getIntValue());
+                            break;
+                    }
                     return builder.build();
                 })
                 .toList();
