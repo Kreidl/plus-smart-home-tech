@@ -30,7 +30,7 @@ public class AggregationStarter {
     private final KafkaConsumer<String, SensorEventAvro> consumer;
     private final KafkaProducer<String, SpecificRecordBase> producer;
     private final AggregatorUpdater aggregatorUpdater;
-    private final Duration  CONSUME_ATTEMPT_TIMEOUT = Duration.ofMillis(1000);
+    private final Duration CONSUME_ATTEMPT_TIMEOUT = Duration.ofMillis(1000);
     private static final Map<TopicPartition, OffsetAndMetadata> currentOffsets = new HashMap<>();
 
     /**
@@ -44,7 +44,6 @@ public class AggregationStarter {
             consumer.subscribe(List.of(kafkaConfig.getSensorEventTopic()));
             while (true) {
                 ConsumerRecords<String, SensorEventAvro> records = consumer.poll(CONSUME_ATTEMPT_TIMEOUT);
-
                 int count = 0;
                 for (ConsumerRecord<String, SensorEventAvro> record : records) {
                     Optional<SensorsSnapshotAvro> sensorsSnapshotAvroOpt =
