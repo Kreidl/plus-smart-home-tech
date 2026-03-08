@@ -3,6 +3,7 @@ package ru.yandex.practicum.service.processors.handlers.hub;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.kafka.telemetry.event.DeviceAddedEventAvro;
 import ru.yandex.practicum.kafka.telemetry.event.HubEventAvro;
 import ru.yandex.practicum.model.HubEventType;
@@ -25,6 +26,7 @@ public class DeviceAddedEventHandler implements HubEventHandler {
         return DeviceAddedEventAvro.class.getSimpleName();
     }
 
+    @Transactional
     @Override
     public void handle(HubEventAvro hubEventAvro) {
         DeviceAddedEventAvro deviceAddedEventAvro = (DeviceAddedEventAvro) hubEventAvro.getPayload();

@@ -3,6 +3,7 @@ package ru.yandex.practicum.service.processors.handlers.hub;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.kafka.telemetry.event.HubEventAvro;
 import ru.yandex.practicum.kafka.telemetry.event.ScenarioRemovedEventAvro;
 import ru.yandex.practicum.model.HubEventType;
@@ -32,6 +33,7 @@ public class ScenarioRemovedEventHandler implements HubEventHandler {
     }
 
     @Override
+    @Transactional
     public void handle(HubEventAvro hubEventAvro) {
         ScenarioRemovedEventAvro scenarioRemovedEventAvro = (ScenarioRemovedEventAvro) hubEventAvro.getPayload();
         Optional<Scenario> scenarioOpt = scenarioRepository.findByHubIdAndName(hubEventAvro.getHubId(),
