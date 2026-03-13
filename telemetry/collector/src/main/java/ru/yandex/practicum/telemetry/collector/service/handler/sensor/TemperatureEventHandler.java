@@ -1,11 +1,13 @@
 package ru.yandex.practicum.telemetry.collector.service.handler.sensor;
 
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.grpc.telemetry.event.SensorEventProto;
+import ru.yandex.practicum.grpc.telemetry.event.TemperatureSensorProto;
 import ru.yandex.practicum.kafka.telemetry.event.TemperatureSensorAvro;
 import ru.yandex.practicum.telemetry.collector.configuration.KafkaProducerConfig;
-import ru.yandex.practicum.telemetry.collector.model.sensor.SensorEvent;
 import ru.yandex.practicum.telemetry.collector.model.sensor.SensorEventType;
-import ru.yandex.practicum.telemetry.collector.model.sensor.TemperatureSensorEvent;
+
+import java.time.Instant;
 
 @Component(value = "TEMPERATURE_SENSOR")
 public class TemperatureEventHandler extends BaseSensorEventHandler<TemperatureSensorAvro> {
@@ -20,14 +22,21 @@ public class TemperatureEventHandler extends BaseSensorEventHandler<TemperatureS
     }
 
     @Override
-    public TemperatureSensorAvro mapToAvro(SensorEvent sensorEvent) {
-        TemperatureSensorEvent temperatureSensorEvent = (TemperatureSensorEvent) sensorEvent;
+    public SensorEventProto.PayloadCase getMessageTypeProto() {
+        return SensorEventProto.PayloadCase.TEMPERATURE_SENSOR;
+    }
+
+    @Override
+    public TemperatureSensorAvro protoToAvro(SensorEventProto sensorEvent) {
+        TemperatureSensorProto temperatureSensorProto = sensorEvent.getTemperatureSensor();
+        Instant timestamp = Instant.ofEpochSecond(sensorEvent.getTimestamp().getSeconds(),
+                sensorEvent.getTimestamp().getNanos());
         return TemperatureSensorAvro.newBuilder()
-                .setId(temperatureSensorEvent.getId())
-                .setHubId(temperatureSensorEvent.getHubId())
-                .setTimestamp(temperatureSensorEvent.getTimestamp())
-                .setTemperatureC(temperatureSensorEvent.getTemperatureC())
-                .setTemperatureF(temperatureSensorEvent.getTemperatureF())
+                .setId(sensorEvent.getId())
+                .setHubId(sensorEvent.getHubId())
+                .setTimestamp(timestamp)
+                .setTemperatureC(temperatureSensorProto.getTemperatureC())
+                .setTemperatureF(temperatureSensorProto.getTemperatureF())
                 .build();
     }
 }
