@@ -27,8 +27,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class AggregationStarter {
     private final KafkaConfig kafkaConfig;
-    private final KafkaConsumer<String, SensorEventAvro> consumer;
-    private final KafkaProducer<String, SpecificRecordBase> producer;
     private final AggregatorUpdater aggregatorUpdater;
     private final Duration CONSUME_ATTEMPT_TIMEOUT = Duration.ofMillis(1000);
     private static final Map<TopicPartition, OffsetAndMetadata> currentOffsets = new HashMap<>();
@@ -39,6 +37,8 @@ public class AggregationStarter {
      * формирует снимок их состояния и записывает в кафку.
      */
     public void start() {
+        KafkaConsumer<String, SensorEventAvro> consumer = kafkaConfig.createKafkaSensorEventConsumer();
+        KafkaProducer<String, SpecificRecordBase> producer = kafkaConfig.createKafkaSnapshotProducer();
         Runtime.getRuntime().addShutdownHook(new Thread(consumer::wakeup));
         try {
             consumer.subscribe(List.of(kafkaConfig.getSensorEventTopic()));
