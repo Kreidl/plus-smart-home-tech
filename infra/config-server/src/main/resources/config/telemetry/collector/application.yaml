@@ -1,0 +1,29 @@
+spring:
+  output:
+    ansi:
+      enabled: always
+
+grpc:
+  server:
+    port: 59091
+
+collector:
+  kafka:
+    hub-producer-properties:
+      bootstrap.servers: localhost:9092
+      key.serializer: org.apache.kafka.common.serialization.StringSerializer
+      value.serializer: ru.yandex.practicum.telemetry.collector.configuration.AvroSerializer
+    sensor-producer-properties:
+      bootstrap.servers: localhost:9092
+      key.serializer: org.apache.kafka.common.serialization.StringSerializer
+      value.serializer: ru.yandex.practicum.telemetry.collector.configuration.AvroSerializer
+    topics:
+      sensors-events: telemetry.sensors.v1
+      hubs-events: telemetry.hubs.v1
+
+logging:
+  level:
+    ru.practicum: DEBUG
+    org.springframework.web: DEBUG
+    org.apache.kafka: DEBUG
+    org.apache.http: DEBUG
