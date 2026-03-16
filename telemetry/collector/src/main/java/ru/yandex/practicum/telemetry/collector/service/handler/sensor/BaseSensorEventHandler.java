@@ -19,7 +19,7 @@ public abstract class BaseSensorEventHandler<T> implements SensorEventHandler {
 
     public BaseSensorEventHandler(KafkaProducerConfig kafkaProducerConfig) {
         this.kafkaProducerConfig = kafkaProducerConfig;
-        kafkaProducer = kafkaProducerConfig.kafkaSensorProducer();
+        kafkaProducer = kafkaProducerConfig.createKafkaSensorProducer();
     }
 
     @Override
@@ -45,7 +45,7 @@ public abstract class BaseSensorEventHandler<T> implements SensorEventHandler {
                 .build();
         log.info("End of converting SensorEventProto with MessageType {} to Avro {}",
                 getMessageTypeProto(), sensorEventAvro);
-        ProducerRecord<String, SensorEventAvro> record = new ProducerRecord<>(kafkaProducerConfig.sensorTopic(),
+        ProducerRecord<String, SensorEventAvro> record = new ProducerRecord<>(kafkaProducerConfig.getSensorTopic(),
                 sensorEventProto.getHubId(), sensorEventAvro);
         kafkaProducer.send(record, (metadata, exception) -> {
             if (exception != null) {

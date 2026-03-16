@@ -19,7 +19,7 @@ public abstract class BaseHubEventHandler<T> implements HubEventHandler {
 
     public BaseHubEventHandler(KafkaProducerConfig kafkaProducerConfig) {
         this.kafkaProducerConfig = kafkaProducerConfig;
-        kafkaProducer = kafkaProducerConfig.kafkaHubProducer();
+        kafkaProducer = kafkaProducerConfig.createKafkaHubProducer();
     }
 
     @Override
@@ -41,7 +41,7 @@ public abstract class BaseHubEventHandler<T> implements HubEventHandler {
                 .build();
         log.info("End of converting HubEventProto with MessageType {} to Avro {}",
                 getMessageTypeProto(), hubEventAvro);
-        ProducerRecord<String, HubEventAvro> record = new ProducerRecord<>(kafkaProducerConfig.hubTopic(),
+        ProducerRecord<String, HubEventAvro> record = new ProducerRecord<>(kafkaProducerConfig.getHubTopic(),
                 hubEventProto.getHubId(), hubEventAvro);
         kafkaProducer.send(record, (metadata, exception) -> {
             if (exception != null) {
