@@ -1,0 +1,28 @@
+server:
+  port: 0
+
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/shopping-cart
+    username: cart
+    password: "12345"
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+  sql:
+    init:
+      mode: always
+  output:
+    ansi:
+      enabled: always
+
+logging:
+  level:
+    ru.practicum: INFO
+    org.springframework.web: ERROR
+    org.apache.kafka: ERROR
+    org.apache.http: ERROR
