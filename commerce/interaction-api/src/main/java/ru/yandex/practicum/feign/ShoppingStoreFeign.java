@@ -1,0 +1,34 @@
+package ru.yandex.practicum.feign;
+
+import feign.FeignException;
+import jakarta.validation.Valid;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.data.domain.Page;
+import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.store.dto.ProductDto;
+import ru.yandex.practicum.store.dto.SetProductQuantityState;
+import ru.yandex.practicum.store.enums.ProductCategory;
+
+import java.util.UUID;
+
+@FeignClient(name= "shopping-store", path = "/api/v1/shopping-store")
+public interface ShoppingStoreFeign {
+    @GetMapping
+    Page<ProductDto> getProductsByCategory(ProductCategory productCategory, int page, int size, String sort)
+            throws FeignException;
+
+    @GetMapping("/{productId}")
+    ProductDto getProductById(@PathVariable UUID productId) throws FeignException;
+
+    @PutMapping
+    ProductDto createNewProduct(@Valid @RequestBody ProductDto productDto) throws FeignException;
+
+    @PostMapping
+    ProductDto updateProduct(@Valid @RequestBody ProductDto productDto) throws FeignException;
+
+    @PostMapping("/removeProductFromStore")
+    Boolean removeProductById(@RequestBody UUID productId) throws FeignException;
+
+    @PostMapping("/quantityState")
+    Boolean setProductQuantityState(@Valid SetProductQuantityState request) throws FeignException;
+}
