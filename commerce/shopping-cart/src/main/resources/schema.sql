@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS carts (
 
 -- создаём таблицу cart_products
 CREATE TABLE IF NOT EXISTS cart_products (
-    cart_id           UUID NOT NULL REFERENCES shopping_carts(cart_id) ON DELETE CASCADE,
+    cart_id           UUID NOT NULL REFERENCES carts(cart_id) ON DELETE CASCADE,
     product_id        UUID NOT NULL,
     quantity          BIGINT NOT NULL,
     PRIMARY KEY(cart_id, product_id)
