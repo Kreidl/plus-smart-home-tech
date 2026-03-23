@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.yandex.practicum.exception.model.ProductNotFoundException;
 import ru.yandex.practicum.mapper.ProductMapper;
 import ru.yandex.practicum.model.Product;
 import ru.yandex.practicum.repository.ProductRepository;
@@ -36,7 +37,7 @@ public class ProductServiceImpl implements ProductService {
     @Transactional(readOnly = true)
     public ProductDto getProductById(UUID productId) {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new NotFoundException("Product with id " + productId + " not found"));
+                .orElseThrow(() -> new ProductNotFoundException("Product with id " + productId + " not found"));
         return ProductMapper.mapToDto(product);
     }
 
@@ -51,14 +52,14 @@ public class ProductServiceImpl implements ProductService {
             throw new IllegalArgumentException("Product id can not be null");
         }
         productRepository.findById(productDto.id())
-                .orElseThrow(() -> new NotFoundException("Product with id " + productDto.id() + " not found"));
+                .orElseThrow(() -> new ProductNotFoundException("Product with id " + productDto.id() + " not found"));
         return ProductMapper.mapToDto(productRepository.save(ProductMapper.mapToEntity(productDto)));
     }
 
     @Override
     public Boolean removeProductById(UUID productId) {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new NotFoundException("Product with id " + productId + " not found"));
+                .orElseThrow(() -> new ProductNotFoundException("Product with id " + productId + " not found"));
         if (product.getProductState().equals(ProductState.DEACTIVATE)) {
             return false;
         }
@@ -70,7 +71,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Boolean setProductQuantityState(SetProductQuantityState request) {
         Product product = productRepository.findById(request.productId())
-                .orElseThrow(() -> new NotFoundException("Product with id " + request.productId() + " not found"));
+                .orElseThrow(() -> new ProductNotFoundException("Product with id " + request.productId() + " not found"));
         if (product.getQuantityState().equals(request.quantityState())) {
             return false;
         }
