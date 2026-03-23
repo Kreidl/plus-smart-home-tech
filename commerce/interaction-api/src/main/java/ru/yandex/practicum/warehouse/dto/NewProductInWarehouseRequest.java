@@ -5,5 +5,5 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.UUID;
 
-public record NewProductInWarehouseRequest (@NotNull UUID productId, @NotNull DimensionDto dimensionDto,
+public record NewProductInWarehouseRequest (@NotNull UUID productId, @NotNull DimensionDto dimension,
                                             Boolean fragile, @NotNull @Min(1) Double weight) {}

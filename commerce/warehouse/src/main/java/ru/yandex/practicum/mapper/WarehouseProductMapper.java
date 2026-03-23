@@ -9,9 +9,9 @@ public class WarehouseProductMapper {
     public static WarehouseProduct mapToEntity(NewProductInWarehouseRequest request) {
         WarehouseProduct warehouseProduct = new WarehouseProduct();
         warehouseProduct.setProductId(request.productId());
-        warehouseProduct.setWidth(request.dimensionDto().width());
-        warehouseProduct.setHeight(request.dimensionDto().height());
-        warehouseProduct.setDepth(request.dimensionDto().depth());
+        warehouseProduct.setWidth(request.dimension().width());
+        warehouseProduct.setHeight(request.dimension().height());
+        warehouseProduct.setDepth(request.dimension().depth());
         warehouseProduct.setWeight(request.weight());
         warehouseProduct.setFragile(request.fragile());
         warehouseProduct.setQuantity(0L);

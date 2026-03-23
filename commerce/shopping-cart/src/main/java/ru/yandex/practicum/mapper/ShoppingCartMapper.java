@@ -4,9 +4,6 @@ import lombok.experimental.UtilityClass;
 import ru.yandex.practicum.cart.dto.ShoppingCartDto;
 import ru.yandex.practicum.model.ShoppingCart;
 
-import java.util.Map;
-import java.util.UUID;
-
 @UtilityClass
 public class ShoppingCartMapper {
     public static ShoppingCartDto mapToDto(ShoppingCart shoppingCart) {
@@ -17,5 +14,4 @@ public class ShoppingCartMapper {
                                            Boolean activated) {
         return new ShoppingCart(shoppingCartDto.cartId(), username, activated, shoppingCartDto.products());
     }
-
 }

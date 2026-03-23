@@ -15,7 +15,6 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class WarehouseProduct {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "product_id")
     UUID productId;
 

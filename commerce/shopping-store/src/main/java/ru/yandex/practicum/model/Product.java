@@ -19,10 +19,10 @@ import java.util.UUID;
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    UUID id;
+    UUID productId;
 
     @Column(name = "name")
-    String name;
+    String productName;
 
     @Column(name = "description")
     String description;
