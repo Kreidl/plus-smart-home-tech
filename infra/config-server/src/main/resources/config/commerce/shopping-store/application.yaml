@@ -4,7 +4,7 @@ server:
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/shopping-store
+    url: jdbc:postgresql://localhost:5434/shopping-store
     username: store
     password: "12345"
   jpa:

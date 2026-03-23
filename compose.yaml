@@ -56,7 +56,7 @@ services:
     image: postgres:16.1
     container_name: shopping-cart-db
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - ./volumes/postgres/shopping-cart-db_data:/var/lib/postgresql/data
     environment:
@@ -74,7 +74,7 @@ services:
     image: postgres:16.1
     container_name: shopping-store-db
     ports:
-      - "5432:5432"
+      - "5434:5432"
     volumes:
       - ./volumes/postgres/shopping-store-db_data:/var/lib/postgresql/data
     environment:
@@ -92,7 +92,7 @@ services:
     image: postgres:16.1
     container_name: warehouse-db
     ports:
-      - "5432:5432"
+      - "5435:5432"
     volumes:
       - ./volumes/postgres/warehouse-db_data:/var/lib/postgresql/data
     environment:
