@@ -25,30 +25,35 @@ public class ShoppingCartController implements ShoppingCartFeign {
     @Override
     @ResponseStatus(HttpStatus.OK)
     public ShoppingCartDto getCartByUsername(String username) {
+        log.info("New request from {} to get cart by name", username);
         return shoppingCartService.getCartByUsername(username);
     }
 
     @Override
     @ResponseStatus(HttpStatus.OK)
     public ShoppingCartDto addProductInCart(String username, Map<UUID, Long> products) {
+        log.info("New request from {} to add product in cart {}", username, products);
         return shoppingCartService.addProductsToCart(username, products);
     }
 
     @Override
     @ResponseStatus(HttpStatus.OK)
     public void deactivateCart(String username) {
+        log.info("New request from {} to deactivate cart", username);
         shoppingCartService.deactivateCart(username);
     }
 
     @Override
     @ResponseStatus(HttpStatus.OK)
     public ShoppingCartDto removeProductsFromCart(String username, List<UUID> products) {
+        log.info("New request from user {} to remove products from cart {}", username, products);
         return shoppingCartService.removeProductsFromCart(username, products);
     }
 
     @Override
     @ResponseStatus(HttpStatus.OK)
     public ShoppingCartDto changeProductQuantity(String username, ChangeProductQuantityRequest request) {
+        log.info("New request from {} to change product quantity in cart {}", username, request);
         return shoppingCartService.changeProductQuantity(username, request);
     }
 }

@@ -25,11 +25,11 @@ public interface ShoppingCartFeign {
     @DeleteMapping
     void deactivateCart(@RequestParam(name = "username") String username) throws FeignException;
 
-    @PostMapping
+    @PostMapping("/remove")
     ShoppingCartDto removeProductsFromCart(@RequestParam(name = "username") String username,
                                            @RequestBody List<UUID> products) throws FeignException;
 
-    @PostMapping
+    @PostMapping("/change-quantity")
     ShoppingCartDto changeProductQuantity(@RequestParam(name = "username") String username,
                                           @Valid @RequestBody ChangeProductQuantityRequest request)
             throws FeignException;

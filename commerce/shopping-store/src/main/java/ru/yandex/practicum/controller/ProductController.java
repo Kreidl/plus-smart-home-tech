@@ -1,6 +1,5 @@
 package ru.yandex.practicum.controller;
 
-import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -26,36 +25,43 @@ public class ProductController implements ShoppingStoreFeign {
     @Override
     @ResponseStatus(HttpStatus.OK)
     public Page<ProductDto> getProductsByCategory(ProductCategory productCategory, int page, int size, String sort) {
+        log.info("New request to get products by category {} with page parameters: page={}, size={}, sort={}",
+                productCategory, page, size, sort);
         return productService.getProductsByCategory(productCategory, page, size, sort);
     }
 
     @Override
     @ResponseStatus(HttpStatus.OK)
     public ProductDto getProductById(UUID productId) {
+        log.info("New request to get product by id {}",productId);
         return productService.getProductById(productId);
     }
 
     @Override
-    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseStatus(HttpStatus.OK)
     public ProductDto createNewProduct(ProductDto productDto) {
+        log.info("New request to create new product {}",productDto);
         return productService.createNewProduct(productDto);
     }
 
     @Override
     @ResponseStatus(HttpStatus.OK)
     public ProductDto updateProduct(ProductDto productDto) {
+        log.info("New request to update product {}",productDto);
         return productService.updateProduct(productDto);
     }
 
     @Override
     @ResponseStatus(HttpStatus.OK)
     public Boolean removeProductById(UUID productId) {
+        log.info("New request to remove product with id {}",productId);
         return productService.removeProductById(productId);
     }
 
     @Override
     @ResponseStatus(HttpStatus.OK)
     public Boolean setProductQuantityState(SetProductQuantityState request) {
+        log.info("New request to set quantity state {}", request);
         return productService.setProductQuantityState(request);
     }
 }

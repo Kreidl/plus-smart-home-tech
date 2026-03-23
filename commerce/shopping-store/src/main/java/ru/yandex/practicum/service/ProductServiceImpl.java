@@ -1,7 +1,7 @@
 package ru.yandex.practicum.service;
 
-import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +19,7 @@ import ru.yandex.practicum.store.enums.ProductState;
 
 import java.util.UUID;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -28,6 +29,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional(readOnly = true)
     public Page<ProductDto> getProductsByCategory(ProductCategory productCategory, int page, int size, String sort) {
+        log.info("Starting to get products by category");
         Pageable pageable = createPageable(page, size, sort);
         return productRepository.findByProductCategory(productCategory, pageable)
                 .map(ProductMapper::mapToDto);
@@ -36,31 +38,40 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional(readOnly = true)
     public ProductDto getProductById(UUID productId) {
+        log.info("Starting to get product by id");
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ProductNotFoundException("Product with id " + productId + " not found"));
+        log.debug("Product founded {}", product);
         return ProductMapper.mapToDto(product);
     }
 
     @Override
     public ProductDto createNewProduct(ProductDto productDto) {
+        log.info("Starting to create new product");
         return ProductMapper.mapToDto(productRepository.save(ProductMapper.mapToEntity(productDto)));
     }
 
     @Override
     public ProductDto updateProduct(ProductDto productDto) {
-        if (productDto.id() == null) {
+        log.info("Starting to update product");
+        if (productDto.productId() == null) {
+            log.warn("Product id can not be null");
             throw new IllegalArgumentException("Product id can not be null");
         }
-        productRepository.findById(productDto.id())
-                .orElseThrow(() -> new ProductNotFoundException("Product with id " + productDto.id() + " not found"));
+        productRepository.findById(productDto.productId())
+                .orElseThrow(() -> new ProductNotFoundException("Product with id " + productDto.productId()
+                        + " not found"));
         return ProductMapper.mapToDto(productRepository.save(ProductMapper.mapToEntity(productDto)));
     }
 
     @Override
     public Boolean removeProductById(UUID productId) {
+        log.info("Starting to remove product by id");
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ProductNotFoundException("Product with id " + productId + " not found"));
+        log.debug("Product founded {}", product);
         if (product.getProductState().equals(ProductState.DEACTIVATE)) {
+            log.debug("Product already deactivated {}", product);
             return false;
         }
         product.setProductState(ProductState.DEACTIVATE);
@@ -70,13 +81,17 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Boolean setProductQuantityState(SetProductQuantityState request) {
+        log.info("Starting to set product quantity state");
         Product product = productRepository.findById(request.productId())
                 .orElseThrow(() -> new ProductNotFoundException("Product with id " + request.productId() + " not found"));
+        log.debug("Product founded {}", product);
         if (product.getQuantityState().equals(request.quantityState())) {
+            log.debug("Product quantity state already set {}", product);
             return false;
         }
         product.setQuantityState(request.quantityState());
         productRepository.save(product);
+        log.debug("Product quantity state set {}", product);
         return true;
     }
 

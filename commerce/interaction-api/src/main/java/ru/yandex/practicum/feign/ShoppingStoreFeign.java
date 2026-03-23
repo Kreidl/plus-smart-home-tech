@@ -14,8 +14,10 @@ import java.util.UUID;
 @FeignClient(name= "shopping-store", path = "/api/v1/shopping-store")
 public interface ShoppingStoreFeign {
     @GetMapping
-    Page<ProductDto> getProductsByCategory(ProductCategory productCategory, int page, int size, String sort)
-            throws FeignException;
+    Page<ProductDto> getProductsByCategory(@RequestParam(name = "category") ProductCategory productCategory,
+                                           @RequestParam(defaultValue = "0") int page,
+                                           @RequestParam(defaultValue = "20") int size,
+                                           @RequestParam(required = false) String sort) throws FeignException;
 
     @GetMapping("/{productId}")
     ProductDto getProductById(@PathVariable UUID productId) throws FeignException;

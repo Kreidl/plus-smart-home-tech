@@ -1,6 +1,5 @@
 package ru.yandex.practicum.controller;
 
-import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -24,25 +23,31 @@ public class WarehouseController implements WarehouseFeign {
 
     @Override
     @ResponseStatus(HttpStatus.OK)
-    public void addNewProduct(NewProductInWarehouseRequest request) throws FeignException {
+    public void addNewProduct(NewProductInWarehouseRequest request) {
+        log.info("New request to add new product {}", request);
         warehouseService.addNewProduct(request);
+        log.debug("New product added");
     }
 
     @Override
     @ResponseStatus(HttpStatus.OK)
-    public BookedProductsDto checkCart(ShoppingCartDto shoppingCartDto) throws FeignException {
+    public BookedProductsDto checkCart(ShoppingCartDto shoppingCartDto) {
+        log.info("New request to check cart {}", shoppingCartDto);
         return warehouseService.checkCart(shoppingCartDto);
     }
 
     @Override
     @ResponseStatus(HttpStatus.OK)
-    public void addProductToWarehouse(AddProductToWarehouseRequest request) throws FeignException {
+    public void addProductToWarehouse(AddProductToWarehouseRequest request) {
+        log.info("New request to add product to warehouse {}", request);
         warehouseService.addProductToWarehouse(request);
+        log.debug("Product added");
     }
 
     @Override
     @ResponseStatus(HttpStatus.OK)
-    public AddressDto getWarehouseAddress() throws FeignException {
+    public AddressDto getWarehouseAddress() {
+        log.info("New request to get warehouse address");
         return warehouseService.getWarehouseAddress();
     }
 }
