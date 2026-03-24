@@ -77,10 +77,6 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
             log.warn("Cart is empty");
             throw new NoProductsInShoppingCartException("Cart is empty");
         }
-        if (products.isEmpty()) {
-            log.warn("Product list for removing is empty");
-            throw new NoProductsInShoppingCartException("Product list for removing is empty");
-        }
         checkCartActivation(shoppingCart);
         for (UUID productId : products) {
             if (!shoppingCart.getProducts().containsKey(productId)) {
