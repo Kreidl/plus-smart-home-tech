@@ -134,4 +134,11 @@ public class GlobalExceptionHandler {
         log.warn(e.getMessage());
         return new ErrorResponse("Authorization problems", e.getMessage(), LocalDateTime.now());
     }
+
+    @ResponseStatus(HttpStatus.GATEWAY_TIMEOUT)
+    @ExceptionHandler(FallbackException.class)
+    public ErrorResponse handleIFallbackException(FallbackException e) {
+        log.warn("Exception occurred: {}", e.getMessage(), e);
+        return new ErrorResponse("Server exception", e.getMessage(), LocalDateTime.now());
+    }
 }
