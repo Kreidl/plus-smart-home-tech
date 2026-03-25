@@ -45,11 +45,11 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         for (Map.Entry<UUID, Long> entry : newProducts.entrySet()) {
             UUID productId = entry.getKey();
             Long quantity = entry.getValue();
-            if (shoppingCart.getProducts().containsKey(productId)) {
-                changeProductQuantity(username, new ChangeProductQuantityRequest(productId, quantity));
-            } else {
-                shoppingCart.getProducts().put(productId, quantity);
+            if (quantity == null || quantity <= 0) {
+                log.warn("Skipping null quantity for product {}: {}", productId, quantity);
+                continue;
             }
+            shoppingCart.getProducts().merge(productId, quantity, Long::sum);
         }
         warehouseFeign.checkCart(ShoppingCartMapper.mapToDto(shoppingCart));
         return ShoppingCartMapper.mapToDto(shoppingCartRepository.save(shoppingCart));
