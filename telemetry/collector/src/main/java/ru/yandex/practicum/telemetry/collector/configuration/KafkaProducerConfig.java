@@ -4,15 +4,11 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import ru.yandex.practicum.kafka.telemetry.event.HubEventAvro;
 import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -22,18 +18,20 @@ import java.util.Properties;
 @Configuration
 @ConfigurationProperties("collector.kafka")
 public class KafkaProducerConfig {
-
     private Map<String, String> topics;
-    private Map<String, String> producer = new HashMap<>();
+    private Map<String, String> hubProducerProperties;
+    private Map<String, String> sensorProducerProperties;
 
-    public Properties getProducerProperties() {
-        Properties properties = new Properties();
-        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-        properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
-                "ru.yandex.practicum.kafka.telemetry.collector.configuration.AvroSerializer");
-        properties.putAll(producer);
-        return properties;
+    public Properties getHubProducerProperties() {
+        Properties props = new Properties();
+        props.putAll(hubProducerProperties);
+        return props;
+    }
+
+    public Properties getSensorProducerProperties() {
+        Properties props = new Properties();
+        props.putAll(sensorProducerProperties);
+        return props;
     }
 
     public String getHubTopic() {
@@ -44,23 +42,11 @@ public class KafkaProducerConfig {
         return topics != null ? topics.get("sensors-events") : "telemetry.sensors.v1";
     }
 
-    @Bean
-    public String hubTopic() {
-        return getHubTopic();
+    public KafkaProducer<String, HubEventAvro> createKafkaHubProducer() {
+        return new KafkaProducer<>(getHubProducerProperties());
     }
 
-    @Bean
-    public String sensorTopic() {
-        return getSensorTopic();
-    }
-
-    @Bean
-    public KafkaProducer<String, HubEventAvro> kafkaHubProducer() {
-        return new KafkaProducer<>(getProducerProperties());
-    }
-
-    @Bean
-    public KafkaProducer<String, SensorEventAvro> kafkaSensorProducer() {
-        return new KafkaProducer<>(getProducerProperties());
+    public KafkaProducer<String, SensorEventAvro> createKafkaSensorProducer() {
+        return new KafkaProducer<>(getSensorProducerProperties());
     }
 }
