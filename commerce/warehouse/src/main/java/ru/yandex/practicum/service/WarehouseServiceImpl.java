@@ -9,17 +9,14 @@ import ru.yandex.practicum.exception.model.NoSpecifiedProductInWarehouseExceptio
 import ru.yandex.practicum.exception.model.ProductInShoppingCartLowQuantityInWarehouse;
 import ru.yandex.practicum.exception.model.SpecifiedProductAlreadyInWarehouseException;
 import ru.yandex.practicum.mapper.WarehouseProductMapper;
+import ru.yandex.practicum.model.OrderBooking;
 import ru.yandex.practicum.model.WarehouseProduct;
+import ru.yandex.practicum.repository.OrderBookingRepository;
 import ru.yandex.practicum.repository.WarehouseRepository;
-import ru.yandex.practicum.warehouse.dto.AddProductToWarehouseRequest;
-import ru.yandex.practicum.warehouse.dto.AddressDto;
-import ru.yandex.practicum.warehouse.dto.BookedProductsDto;
-import ru.yandex.practicum.warehouse.dto.NewProductInWarehouseRequest;
+import ru.yandex.practicum.warehouse.dto.*;
 
 import java.security.SecureRandom;
-import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -27,6 +24,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class WarehouseServiceImpl implements WarehouseService {
     private final WarehouseRepository warehouseRepository;
+    private final OrderBookingRepository orderBookingRepository;
     private final AddressDto warehouseAddress = initAddress();
 
     @Override
@@ -44,14 +42,81 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Override
     public BookedProductsDto checkCart(ShoppingCartDto shoppingCartDto) {
         log.info("Starting to check cart");
+        Map<UUID, Long> productsInCart = shoppingCartDto.products();
+        BookedProductsDto bookedProductsDto = checkProductQuantityInWarehouse(productsInCart);
+        log.debug("Cart checked: totalWeight={}, totalVolume={}, hasFragile={}", bookedProductsDto.deliveryWeight(),
+                bookedProductsDto.deliveryVolume(), bookedProductsDto.fragile());
+        return bookedProductsDto;
+    }
+
+    @Override
+    public void addProductToWarehouse(AddProductToWarehouseRequest request) {
+        log.info("Starting to add product count to warehouse");
+        WarehouseProduct warehouseProduct = getProductFromWarehouseById(request.productId());
+        log.debug("Product from warehouse found {}", warehouseProduct);
+        Long newQuantity = warehouseProduct.getQuantity() + request.quantity();
+        warehouseProduct.setQuantity(newQuantity);
+        warehouseRepository.save(warehouseProduct);
+        log.debug("Product count to warehouse added {}", warehouseProduct);
+    }
+
+    @Override
+    public AddressDto getWarehouseAddress() {
+        log.info("Starting to get warehouse address");
+        return warehouseAddress;
+    }
+
+    @Override
+    public void shippedToDelivery(ShippedToDeliveryRequest request) {
+        log.info("Starting to set delivery id in bookings");
+        List<OrderBooking> orderBookings = orderBookingRepository.findByOrderId(request.orderId());
+        for (OrderBooking orderBooking : orderBookings) {
+            orderBooking.setDeliveryId(request.deliveryId());
+        }
+        orderBookingRepository.saveAll(orderBookings);
+        log.debug("Delivery id in bookings updated, {}", orderBookings);
+    }
+
+    @Override
+    public BookedProductsDto assemblyProductForOrderFromShoppingCart(AssemblyProductsForOrderRequest request) {
+        log.info("Start of product reduction from warehouse");
+        Map<UUID, Long> products = request.products();
+        BookedProductsDto bookedProductsDto = checkProductQuantityInWarehouse(products);
+        List<WarehouseProduct> productList = warehouseRepository.findAllById(products.keySet());
+        List<OrderBooking> orderBookings = new ArrayList<>();
+        for (WarehouseProduct product : productList) {
+            product.setQuantity(product.getQuantity() - products.get(product.getProductId()));
+            OrderBooking orderBooking = new OrderBooking();
+            orderBooking.setOrderId(request.orderId());
+            orderBooking.setProductId(product.getProductId());
+            orderBooking.setQuantity(product.getQuantity());
+            orderBookings.add(orderBooking);
+        }
+        warehouseRepository.saveAll(productList);
+        orderBookingRepository.saveAll(orderBookings);
+        log.debug("Product reduction from warehouse complete {}", productList);
+        return bookedProductsDto;
+    }
+
+    public void returnProducts(Map<UUID, Long> products) {
+        log.info("Start returning products in warehouse");
+        List<WarehouseProduct> productList = warehouseRepository.findAllById(products.keySet());
+        for (WarehouseProduct product : productList) {
+            product.setQuantity(product.getQuantity() + products.get(product.getProductId()));
+        }
+        warehouseRepository.saveAll(productList);
+        log.info("Products in warehouse returned {}", productList);
+    }
+
+    private BookedProductsDto checkProductQuantityInWarehouse(Map<UUID, Long> products) {
+        log.info("Check products quantity in warehouse {}", products);
         double totalVolume = 0.0;
         double totalWeight = 0.0;
         boolean hasFragile = false;
-        Map<UUID, Long> productsInCart = shoppingCartDto.products();
-        for(UUID productId : productsInCart.keySet()) {
+        for(UUID productId : products.keySet()) {
             WarehouseProduct warehouseProduct = getProductFromWarehouseById(productId);
             log.debug("Product from warehouse found {}", warehouseProduct);
-            Long needQuantity = productsInCart.get(productId);
+            Long needQuantity = products.get(productId);
             if(warehouseProduct.getQuantity() < needQuantity) {
                 log.warn("Not enough products in warehouse");
                 throw new ProductInShoppingCartLowQuantityInWarehouse("Not enough products in warehouse");
@@ -64,25 +129,8 @@ public class WarehouseServiceImpl implements WarehouseService {
                 hasFragile = true;
             }
         }
-        log.debug("Cart checked: totalWeight={}, totalVolume={}, hasFragile={}", totalWeight, totalVolume, hasFragile);
+        log.info("Products quantity in warehouse checked");
         return new BookedProductsDto(totalWeight, totalVolume, hasFragile);
-    }
-
-    @Override
-    public void addProductToWarehouse(AddProductToWarehouseRequest request) {
-        log.info("Starting to add product to warehouse");
-        WarehouseProduct warehouseProduct = getProductFromWarehouseById(request.productId());
-        log.debug("Product from warehouse found {}", warehouseProduct);
-        Long newQuantity = warehouseProduct.getQuantity() + request.quantity();
-        warehouseProduct.setQuantity(newQuantity);
-        warehouseRepository.save(warehouseProduct);
-        log.debug("New product to warehouse added {}", warehouseProduct);
-    }
-
-    @Override
-    public AddressDto getWarehouseAddress() {
-        log.info("Starting to get warehouse address");
-        return warehouseAddress;
     }
 
     private AddressDto initAddress() {

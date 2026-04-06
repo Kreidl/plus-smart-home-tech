@@ -5,10 +5,10 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.cart.dto.ShoppingCartDto;
 import ru.yandex.practicum.exception.model.FallbackException;
 import ru.yandex.practicum.feign.WarehouseFeign;
-import ru.yandex.practicum.warehouse.dto.AddProductToWarehouseRequest;
-import ru.yandex.practicum.warehouse.dto.AddressDto;
-import ru.yandex.practicum.warehouse.dto.BookedProductsDto;
-import ru.yandex.practicum.warehouse.dto.NewProductInWarehouseRequest;
+import ru.yandex.practicum.warehouse.dto.*;
+
+import java.util.Map;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -33,6 +33,22 @@ public class WarehouseFeignFallback implements WarehouseFeign {
     public AddressDto getWarehouseAddress() {
         fallback();
         return null;
+    }
+
+    @Override
+    public void shippedToDelivery(ShippedToDeliveryRequest request) {
+        fallback();
+    }
+
+    @Override
+    public BookedProductsDto assemblyProductForOrderFromShoppingCart(AssemblyProductsForOrderRequest request) {
+        fallback();
+        return null;
+    }
+
+    @Override
+    public void returnProducts(Map<UUID, Long> products) {
+        fallback();
     }
 
     private void fallback() {
