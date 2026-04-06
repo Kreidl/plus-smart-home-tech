@@ -137,8 +137,37 @@ public class GlobalExceptionHandler {
 
     @ResponseStatus(HttpStatus.GATEWAY_TIMEOUT)
     @ExceptionHandler(FallbackException.class)
-    public ErrorResponse handleIFallbackException(FallbackException e) {
+    public ErrorResponse handleFallbackException(FallbackException e) {
         log.warn("Exception occurred: {}", e.getMessage(), e);
         return new ErrorResponse("Server exception", e.getMessage(), LocalDateTime.now());
+    }
+
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(NoOrderFoundException.class)
+    public ErrorResponse handleNoOrderFoundException(NoOrderFoundException e) {
+        log.warn(e.getMessage());
+        return new ErrorResponse("Order not found", e.getMessage(), LocalDateTime.now());
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(NotEnoughInfoInOrderToCalculateException.class)
+    public ErrorResponse handleNotEnoughInfoInOrderToCalculateException(
+            NotEnoughInfoInOrderToCalculateException e) {
+        log.warn(e.getMessage());
+        return new ErrorResponse("Not enough info in order", e.getMessage(), LocalDateTime.now());
+    }
+
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(NoPaymentFoundException.class)
+    public ErrorResponse handleNoPaymentFoundException(NoPaymentFoundException e) {
+        log.warn(e.getMessage());
+        return new ErrorResponse("Payment not found", e.getMessage(), LocalDateTime.now());
+    }
+
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(NoDeliveryFoundException.class)
+    public ErrorResponse handleNoDeliveryFoundException(NoDeliveryFoundException e) {
+        log.warn(e.getMessage());
+        return new ErrorResponse("Delivery not found", e.getMessage(), LocalDateTime.now());
     }
 }
