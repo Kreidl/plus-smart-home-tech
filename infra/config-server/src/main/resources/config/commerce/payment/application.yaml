@@ -1,0 +1,54 @@
+server:
+  port: 0
+
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5436/payment
+    username: payment
+    password: "12345"
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+  sql:
+    init:
+      mode: always
+  output:
+    ansi:
+      enabled: always
+  cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: true
+        alphanumeric-ids:
+          enabled: true
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        failureRateThreshold: 50
+        minimumNumberOfCalls: 5
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        slidingWindowType: COUNT_BASED
+    instances:
+      order:
+        slidingWindowSize: 20
+        waitDurationInOpenState: 10000 # 10 секунд в миллисекундах
+        permittedNumberOfCallsInHalfOpenState: 5
+      shopping-store:
+        slidingWindowSize: 30
+        waitDurationInOpenState: 10000 # 10 секунд в миллисекундах
+        permittedNumberOfCallsInHalfOpenState: 5
+
+logging:
+  level:
+    ru.practicum: INFO
+    org.springframework.web: ERROR
+    org.apache.http: ERROR
+    io.github.resilience4j: DEBUG
+    org.springframework.cloud.circuitbreaker: DEBUG
+    org.springframework.cloud.openfeign: DEBUG
