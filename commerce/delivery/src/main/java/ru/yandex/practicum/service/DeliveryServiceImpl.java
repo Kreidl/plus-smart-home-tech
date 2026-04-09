@@ -88,14 +88,27 @@ public class DeliveryServiceImpl implements DeliveryService {
         Address fromAddress = delivery.getFromAddress();
         Address toAddress = delivery.getToAddress();
         BigDecimal totalCost = BASE_COST_OF_DELIVERY;
+        log.trace("Base delivery cost = {}", totalCost);
+
         totalCost = fromAddress.getCountry().equals("ADDRESS_1") ?
                 totalCost.add(totalCost.multiply(WAREHOUSE_ADDRESS_1_MARKUP)) :
                 totalCost.add(totalCost.multiply(WAREHOUSE_ADDRESS_2_MARKUP));
+        log.trace("Added markup for address = {}, totalCost = {}", fromAddress.getCountry(), totalCost);
+
         totalCost = orderDto.fragile() ? totalCost.add(totalCost.multiply(FRAGILE_MARKUP)) : totalCost;
+        log.trace("Added markup for fragile = {}, totalCost = {}", orderDto.fragile(), totalCost);
+
         totalCost = totalCost.add(BigDecimal.valueOf(orderDto.deliveryWeight()).multiply(WEIGHT_MARKUP));
+        log.trace("Added markup for delivery weight = {}, totalCost = {}", orderDto.deliveryWeight(), totalCost);
+
         totalCost = totalCost.add(BigDecimal.valueOf(orderDto.deliveryVolume()).multiply(VOLUME_MARKUP));
+        log.trace("Added markup for delivery volume = {}, totalCost = {}", orderDto.deliveryVolume(), totalCost);
+
         totalCost = fromAddress.getStreet().equals(toAddress.getStreet()) ?
                 totalCost : totalCost.add(totalCost.multiply(STREET_DIFFERENT_FROM_WAREHOUSE_MARKUP));
+        log.trace("Added markup for delivery street = {}, totalCost = {}",
+                fromAddress.getStreet().equals(toAddress.getStreet()), totalCost);
+
         log.debug("Delivery cost in order with id = {} calculated: {}", orderDto.orderId(), totalCost);
         return totalCost;
     }
