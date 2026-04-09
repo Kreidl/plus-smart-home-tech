@@ -5,6 +5,7 @@ import ru.yandex.practicum.store.dto.ProductDto;
 import ru.yandex.practicum.store.dto.SetProductQuantityState;
 import ru.yandex.practicum.store.enums.ProductCategory;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface ProductService {
@@ -19,4 +20,6 @@ public interface ProductService {
     Boolean removeProductById(UUID productId);
 
     Boolean setProductQuantityState(SetProductQuantityState request);
+
+    List<ProductDto> getProductsById(List<UUID> productIds);
 }

@@ -13,6 +13,7 @@ import ru.yandex.practicum.store.dto.ProductDto;
 import ru.yandex.practicum.store.dto.SetProductQuantityState;
 import ru.yandex.practicum.store.enums.ProductCategory;
 
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -63,5 +64,12 @@ public class ProductController implements ShoppingStoreFeign {
     public Boolean setProductQuantityState(SetProductQuantityState request) {
         log.info("New request to set quantity state {}", request);
         return productService.setProductQuantityState(request);
+    }
+
+    @Override
+    @ResponseStatus(HttpStatus.OK)
+    public List<ProductDto> getProductsById(List<UUID> productIds) {
+        log.info("New request to get products by id {}", productIds);
+        return productService.getProductsById(productIds);
     }
 }

@@ -15,8 +15,10 @@ import ru.yandex.practicum.order.dto.OrderDto;
 import ru.yandex.practicum.payment.dto.PaymentDto;
 import ru.yandex.practicum.payment.enums.PaymentState;
 import ru.yandex.practicum.repository.PaymentRepository;
+import ru.yandex.practicum.store.dto.ProductDto;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -67,18 +69,19 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public BigDecimal calculateProductCost(OrderDto orderDto) {
         Map<UUID, Long> products = orderDto.products();
-        if(products.isEmpty()) {
+        if (products.isEmpty()) {
             throw new NotEnoughInfoInOrderToCalculateException("Not enough info in order to calculate");
         }
+        List<ProductDto> productsList;
+        try {
+            productsList = shoppingStoreFeign.getProductsById(products.keySet().stream().toList());
+        } catch (FeignException e) {
+            throw new RuntimeException(e.getMessage());
+        }
         BigDecimal productCost = BigDecimal.valueOf(0.0);
-        for(UUID productId : products.keySet()) {
-            BigDecimal price;
-            try {
-                price = shoppingStoreFeign.getProductById(productId).price();
-            } catch (FeignException e) {
-                throw new RuntimeException(e.getMessage());
-            }
-            Long quantity = products.get(productId);
+        for (ProductDto product : productsList) {
+            BigDecimal price = product.price();
+            Long quantity = products.get(product.productId());
             productCost = productCost.add(price.multiply(BigDecimal.valueOf(quantity)));
         }
         return productCost;
