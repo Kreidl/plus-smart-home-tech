@@ -34,47 +34,59 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public PaymentDto createPayment(OrderDto orderDto) {
+        log.info("Starting to create payment");
         if(orderDto == null || orderDto.deliveryPrice() == null || orderDto.productPrice() == null
                 || orderDto.totalPrice() == null) {
+            log.warn("Not enough info in order {} to calculate", orderDto);
             throw new NotEnoughInfoInOrderToCalculateException("Not enough info in order to calculate");
         }
         BigDecimal feeTotal = orderDto.productPrice().multiply(TAX_PERCENTAGE);
         Payment payment = PaymentMapper.mapToEntity(orderDto, feeTotal);
         payment.setPaymentState(PaymentState.PENDING);
-        return PaymentMapper.mapToDto(paymentRepository.save(payment));
+        payment = paymentRepository.save(payment);
+        log.debug("Payment created, {}", payment);
+        return PaymentMapper.mapToDto(payment);
     }
 
     @Override
     public BigDecimal calculateTotalCost(OrderDto orderDto) {
+        log.info("Starting to calculate total cost");
         if(orderDto.deliveryPrice() == null || orderDto.productPrice() == null) {
             throw new NotEnoughInfoInOrderToCalculateException("Not enough info in order to calculate");
         }
         BigDecimal feeTotal = orderDto.productPrice().multiply(TAX_PERCENTAGE);
         BigDecimal totalCost = orderDto.productPrice().add(orderDto.deliveryPrice()).add(feeTotal);
+        log.debug("Total cost for order with id = {} calculated, {}", orderDto.orderId(), totalCost);
         return totalCost;
     }
 
     @Override
     public void successfulPayment(UUID paymentId) {
+        log.info("Starting to change payment state to success");
         Payment payment = getPaymentById(paymentId);
         payment.setPaymentState(PaymentState.SUCCESS);
-        paymentRepository.save(payment);
+        payment = paymentRepository.save(payment);
         try {
-            orderFeign.successOrderPayment(payment.getOrderId());
+            OrderDto orderDto = orderFeign.successOrderPayment(payment.getOrderId());
+            log.trace("Order state changed to paid: {}", orderDto);
         } catch (FeignException e) {
             throw new RuntimeException(e.getMessage());
         }
+        log.debug("Payment state in payment with id = {} changed to success, {}", paymentId, payment);
     }
 
     @Override
     public BigDecimal calculateProductCost(OrderDto orderDto) {
+        log.info("Starting to calculate product cost");
         Map<UUID, Long> products = orderDto.products();
         if (products.isEmpty()) {
+            log.warn("Not enough info in order to calculate in order {}", orderDto);
             throw new NotEnoughInfoInOrderToCalculateException("Not enough info in order to calculate");
         }
         List<ProductDto> productsList;
         try {
             productsList = shoppingStoreFeign.getProductsById(products.keySet().stream().toList());
+            log.trace("Product list received: {}", productsList);
         } catch (FeignException e) {
             throw new RuntimeException(e.getMessage());
         }
@@ -84,19 +96,23 @@ public class PaymentServiceImpl implements PaymentService {
             Long quantity = products.get(product.productId());
             productCost = productCost.add(price.multiply(BigDecimal.valueOf(quantity)));
         }
+        log.debug("Product cost for order with id = {} calculated, {}", orderDto.orderId(), productCost);
         return productCost;
     }
 
     @Override
     public void failedPayment(UUID paymentId) {
+        log.info("Starting to change payment state to failed");
         Payment payment = getPaymentById(paymentId);
         payment.setPaymentState(PaymentState.FAILED);
-        paymentRepository.save(payment);
+        payment = paymentRepository.save(payment);
         try {
-            orderFeign.failedOrderPayment(payment.getOrderId());
+            OrderDto orderDto = orderFeign.failedOrderPayment(payment.getOrderId());
+            log.trace("Order state changed to payment failed: {}", orderDto);
         } catch (FeignException e) {
             throw new RuntimeException(e.getMessage());
         }
+        log.debug("Payment state in payment with id = {} changed, {}", paymentId, payment);
     }
 
     private Payment getPaymentById(UUID paymentId) {

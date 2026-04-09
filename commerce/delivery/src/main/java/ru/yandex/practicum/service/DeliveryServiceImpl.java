@@ -38,38 +38,52 @@ public class DeliveryServiceImpl implements DeliveryService {
 
     @Override
     public DeliveryDto planDelivery(DeliveryDto deliveryDto) {
+        log.info("Starting to plan delivery");
         Delivery delivery = DeliveryMapper.mapToEntity(deliveryDto);
         delivery.setDeliveryState(DeliveryState.CREATED);
-        return DeliveryMapper.mapToDto(deliveryRepository.save(delivery));
+        delivery = deliveryRepository.save(delivery);
+        log.debug("Delivery planed, {}", delivery);
+        return DeliveryMapper.mapToDto(delivery);
     }
 
     @Override
     public void successfulDelivery(UUID orderId) {
+        log.info("Starting to change delivery state to success");
         Delivery delivery = getDeliveryByOrderId(orderId);
         delivery.setDeliveryState(DeliveryState.DELIVERED);
         deliveryRepository.save(delivery);
-        orderFeign.orderDelivery(orderId);
+        OrderDto orderDto = orderFeign.orderDelivery(orderId);
+        log.trace("Order state changed to delivered, {}", orderDto);
+        log.debug("Delivery state changed to success: {}", delivery);
     }
 
     @Override
     public void pickedDelivery(UUID orderId) {
+        log.info("Starting to change delivery state to in progress");
         Delivery delivery = getDeliveryByOrderId(orderId);
         delivery.setDeliveryState(DeliveryState.IN_PROGRESS);
         delivery = deliveryRepository.save(delivery);
-        orderFeign.orderAssembly(orderId);
+        OrderDto orderDto = orderFeign.orderAssembly(orderId);
+        log.trace("Order state changed to assembled, {}", orderDto);
         warehouseFeign.shippedToDelivery(new ShippedToDeliveryRequest(orderId, delivery.getDeliveryId()));
+        log.trace("Order shipped to delivery");
+        log.debug("Delivery state changed to in progress: {}", delivery);
     }
 
     @Override
     public void failedDelivery(UUID orderId) {
+        log.info("Starting to change delivery state to failed");
         Delivery delivery = getDeliveryByOrderId(orderId);
         delivery.setDeliveryState(DeliveryState.FAILED);
         deliveryRepository.save(delivery);
-        orderFeign.failedOrderDelivery(orderId);
+        OrderDto orderDto = orderFeign.failedOrderDelivery(orderId);
+        log.trace("Order state changed to failed delivery, {}", orderDto);
+        log.debug("Delivery state changed to failed: {}", delivery);
     }
 
     @Override
     public BigDecimal calculateDeliveryCost(OrderDto orderDto) {
+        log.info("Starting to calculate delivery cost");
         Delivery delivery = getDeliveryById(orderDto.deliveryId());
         Address fromAddress = delivery.getFromAddress();
         Address toAddress = delivery.getToAddress();
@@ -82,6 +96,7 @@ public class DeliveryServiceImpl implements DeliveryService {
         totalCost = totalCost.add(BigDecimal.valueOf(orderDto.deliveryVolume()).multiply(VOLUME_MARKUP));
         totalCost = fromAddress.getStreet().equals(toAddress.getStreet()) ?
                 totalCost : totalCost.add(totalCost.multiply(STREET_DIFFERENT_FROM_WAREHOUSE_MARKUP));
+        log.debug("Delivery cost in order with id = {} calculated: {}", orderDto.orderId(), totalCost);
         return totalCost;
     }
 

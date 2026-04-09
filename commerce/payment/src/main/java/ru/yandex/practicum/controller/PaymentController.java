@@ -21,26 +21,31 @@ public class PaymentController implements PaymentFeign {
 
     @Override
     public PaymentDto createPayment(OrderDto orderDto) {
+        log.info("New request to create payment for order = {}", orderDto);
         return paymentService.createPayment(orderDto);
     }
 
     @Override
     public BigDecimal calculateTotalCost(OrderDto orderDto) {
+        log.info("New request to calculate total cost for order = {}", orderDto);
         return paymentService.calculateTotalCost(orderDto);
     }
 
     @Override
     public void successfulPayment(UUID paymentId) {
+        log.info("New request to change payment state to success for payment with id = {}", paymentId);
         paymentService.successfulPayment(paymentId);
     }
 
     @Override
     public BigDecimal calculateProductCost(OrderDto orderDto) {
+        log.info("New request to calculate product cost for order = {}", orderDto);
         return paymentService.calculateProductCost(orderDto);
     }
 
     @Override
     public void failedPayment(UUID paymentId) {
+        log.info("New request to change payment state to failed for payment with id = {}", paymentId);
         paymentService.failedPayment(paymentId);
     }
 }

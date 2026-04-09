@@ -52,7 +52,10 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
             shoppingCart.getProducts().merge(productId, quantity, Long::sum);
         }
         warehouseFeign.checkCart(ShoppingCartMapper.mapToDto(shoppingCart));
-        return ShoppingCartMapper.mapToDto(shoppingCartRepository.save(shoppingCart));
+        log.trace("Cart checked in warehouse");
+        shoppingCart = shoppingCartRepository.save(shoppingCart);
+        log.debug("Products added to cart: {}", shoppingCart);
+        return ShoppingCartMapper.mapToDto(shoppingCart);
     }
 
     @Override
@@ -65,7 +68,8 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
             throw new CartActivationException("The cart is already deactivated");
         }
         shoppingCart.setActivated(false);
-        shoppingCartRepository.save(shoppingCart);
+        shoppingCart = shoppingCartRepository.save(shoppingCart);
+        log.debug("Cart deactivated: {}", shoppingCart);
     }
 
     @Override
@@ -73,47 +77,42 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         log.info("Start removing products from cart");
         checkUserAuthorization(username);
         ShoppingCart shoppingCart = getOrCreateNewShoppingCart(username);
-        if (shoppingCart == null) {
-            log.warn("Cart is empty");
-            throw new NoProductsInShoppingCartException("Cart is empty");
-        }
+        checkCartFullness(shoppingCart);
         checkCartActivation(shoppingCart);
         for (UUID productId : products) {
-            if (!shoppingCart.getProducts().containsKey(productId)) {
-                log.warn("Product with id {} not found in cart", productId);
-                throw new NoProductsInShoppingCartException("Product with id " + productId + " not found in cart");
-            }
+            checkProductInCart(shoppingCart, productId);
             shoppingCart.getProducts().remove(productId);
         }
-        return ShoppingCartMapper.mapToDto(shoppingCartRepository.save(shoppingCart));
+        shoppingCart = shoppingCartRepository.save(shoppingCart);
+        log.debug("Products removed from cart: {}", shoppingCart);
+        return ShoppingCartMapper.mapToDto(shoppingCart);
     }
 
     @Override
     public ShoppingCartDto changeProductQuantity(String username, ChangeProductQuantityRequest request) {
+        log.info("Start changing product quantity");
         checkUserAuthorization(username);
         ShoppingCart shoppingCart = getOrCreateNewShoppingCart(username);
-        if (shoppingCart == null) {
-            log.warn("Cart is empty");
-            throw new NoProductsInShoppingCartException("Cart is empty");
-        }
+        checkCartFullness(shoppingCart);
         checkCartActivation(shoppingCart);
-        if (!shoppingCart.getProducts().containsKey(request.productId())) {
-            log.warn("Product with id {} not found in cart", request.productId());
-            throw new NoProductsInShoppingCartException("Product with id " + request.productId()
-                    + " not found in cart");
-        }
+        checkProductInCart(shoppingCart, request.productId());
         shoppingCart.getProducts().put(request.productId(), request.newQuantity());
         warehouseFeign.checkCart(ShoppingCartMapper.mapToDto(shoppingCart));
-        return ShoppingCartMapper.mapToDto(shoppingCartRepository.save(shoppingCart));
+        log.trace("Cart checked in warehouse");
+        shoppingCart = shoppingCartRepository.save(shoppingCart);
+        log.debug("Product quantity changed in cart: {}", shoppingCart);
+        return ShoppingCartMapper.mapToDto(shoppingCart);
     }
 
     private ShoppingCart getOrCreateNewShoppingCart(String username) {
-        return shoppingCartRepository.findByUsername(username)
-                .orElseGet(() ->
-                        shoppingCartRepository.save(createCart(username, new HashMap<>())));
+        ShoppingCart shoppingCart = shoppingCartRepository.findByUsername(username)
+                .orElseGet(() -> shoppingCartRepository.save(createCart(username, new HashMap<>())));
+        log.debug("Shopping cart for username = {} received: {}", username, shoppingCart);
+        return shoppingCart;
     }
 
     private ShoppingCart createCart(String username, Map<UUID, Long> products) {
+        log.info("Start create new cart");
         ShoppingCart newCart = new ShoppingCart();
         newCart.setUsername(username);
         newCart.setActivated(true);
@@ -135,6 +134,22 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         if (!shoppingCart.getActivated()) {
             log.warn("The cart is deactivated {}", shoppingCart);
             throw new CartActivationException("The cart is deactivated");
+        }
+    }
+
+    private void checkCartFullness(ShoppingCart shoppingCart) {
+        log.info("Start checking cart fullness");
+        if (shoppingCart == null) {
+            log.warn("Cart is empty");
+            throw new NoProductsInShoppingCartException("Cart is empty");
+        }
+    }
+
+    private void checkProductInCart(ShoppingCart shoppingCart, UUID productId) {
+        log.info("Start checking product in cart");
+        if (!shoppingCart.getProducts().containsKey(productId)) {
+            log.warn("Product with id {} not found in cart", productId);
+            throw new NoProductsInShoppingCartException("Product with id " + productId + " not found in cart");
         }
     }
 }
