@@ -9,10 +9,10 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.cart.dto.ShoppingCartDto;
 import ru.yandex.practicum.feign.WarehouseFeign;
 import ru.yandex.practicum.service.WarehouseService;
-import ru.yandex.practicum.warehouse.dto.AddProductToWarehouseRequest;
-import ru.yandex.practicum.warehouse.dto.AddressDto;
-import ru.yandex.practicum.warehouse.dto.BookedProductsDto;
-import ru.yandex.practicum.warehouse.dto.NewProductInWarehouseRequest;
+import ru.yandex.practicum.warehouse.dto.*;
+
+import java.util.Map;
+import java.util.UUID;
 
 @Slf4j
 @RestController
@@ -49,5 +49,25 @@ public class WarehouseController implements WarehouseFeign {
     public AddressDto getWarehouseAddress() {
         log.info("New request to get warehouse address");
         return warehouseService.getWarehouseAddress();
+    }
+
+    @Override
+    @ResponseStatus(HttpStatus.OK)
+    public void shippedToDelivery(ShippedToDeliveryRequest request) {
+        log.info("New request to set delivery id in bookings");
+        warehouseService.shippedToDelivery(request);
+    }
+
+    @Override
+    @ResponseStatus(HttpStatus.OK)
+    public BookedProductsDto assemblyProductForOrderFromShoppingCart(AssemblyProductsForOrderRequest request) {
+        log.info("New request of product reduction from warehouse");
+        return warehouseService.assemblyProductForOrderFromShoppingCart(request);
+    }
+
+    @Override
+    public void returnProducts(Map<UUID, Long> products) {
+        log.info("New request to return products in warehouse");
+        warehouseService.returnProducts(products);
     }
 }

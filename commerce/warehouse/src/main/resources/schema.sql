@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS warehouse_reserved_products CASCADE;
+DROP TABLE IF EXISTS warehouse_booking_products CASCADE;
 DROP TABLE IF EXISTS warehouse_products CASCADE;
 
 -- создаём таблицу warehouse_products
@@ -12,9 +12,11 @@ CREATE TABLE IF NOT EXISTS warehouse_products (
     quantity                BIGINT NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS warehouse_reserved_products (
-    reserve_id     UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    shopping_cart_id        UUID NOT NULL,
-    product_id              UUID NOT NULL REFERENCES warehouse_products (product_id) ON DELETE CASCADE,
-    reserved_quantity       BIGINT NOT NULL
+-- создаём таблицу warehouse_booking_products
+CREATE TABLE IF NOT EXISTS warehouse_booking_products (
+    booking_id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    order_id           UUID NOT NULL,
+    product_id         UUID NOT NULL REFERENCES warehouse_products (product_id) ON DELETE CASCADE,
+    booked_quantity    BIGINT NOT NULL,
+    delivery_id        UUID
 );

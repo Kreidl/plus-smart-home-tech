@@ -1,5 +1,6 @@
 package ru.yandex.practicum.feign.fallback;
 
+import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
@@ -8,6 +9,7 @@ import ru.yandex.practicum.store.dto.ProductDto;
 import ru.yandex.practicum.store.dto.SetProductQuantityState;
 import ru.yandex.practicum.store.enums.ProductCategory;
 
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -47,6 +49,12 @@ public class ShoppingStoreFeignFallback implements ShoppingStoreFeign {
     public Boolean setProductQuantityState(SetProductQuantityState request) {
         fallback();
         return null;
+    }
+
+    @Override
+    public List<ProductDto> getProductsById(List<UUID> productIds) throws FeignException {
+        fallback();
+        return List.of();
     }
 
     private void fallback() {

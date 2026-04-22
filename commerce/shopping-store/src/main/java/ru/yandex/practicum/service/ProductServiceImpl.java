@@ -17,6 +17,7 @@ import ru.yandex.practicum.store.dto.SetProductQuantityState;
 import ru.yandex.practicum.store.enums.ProductCategory;
 import ru.yandex.practicum.store.enums.ProductState;
 
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -76,6 +77,7 @@ public class ProductServiceImpl implements ProductService {
         }
         product.setProductState(ProductState.DEACTIVATE);
         productRepository.save(product);
+        log.info("Product by id = {} removed", productId);
         return true;
     }
 
@@ -93,6 +95,15 @@ public class ProductServiceImpl implements ProductService {
         productRepository.save(product);
         log.debug("Product quantity state set {}", product);
         return true;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ProductDto> getProductsById(List<UUID> productIds) {
+        log.info("Starting get products by ids");
+        return productRepository.findAllById(productIds).stream()
+                .map(ProductMapper::mapToDto)
+                .toList();
     }
 
     private Pageable createPageable(int page, int size, String sort) {

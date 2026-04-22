@@ -105,3 +105,57 @@ services:
       timeout: 5s
       start_period: 10s
       retries: 5
+
+  payment-db:
+    image: postgres:16.1
+    container_name: payment-db
+    ports:
+      - "5436:5432"
+    volumes:
+      - ./volumes/postgres/payment-db_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: payment
+      POSTGRES_PASSWORD: 12345
+      POSTGRES_DB: payment
+    healthcheck:
+      test: pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB
+      interval: 10s
+      timeout: 5s
+      start_period: 10s
+      retries: 5
+
+  order-db:
+    image: postgres:16.1
+    container_name: order-db
+    ports:
+      - "5437:5432"
+    volumes:
+      - ./volumes/postgres/order-db_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: order
+      POSTGRES_PASSWORD: 12345
+      POSTGRES_DB: order
+    healthcheck:
+      test: pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB
+      interval: 10s
+      timeout: 5s
+      start_period: 10s
+      retries: 5
+
+  delivery-db:
+    image: postgres:16.1
+    container_name: delivery-db
+    ports:
+      - "5438:5432"
+    volumes:
+      - ./volumes/postgres/delivery-db_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: delivery
+      POSTGRES_PASSWORD: 12345
+      POSTGRES_DB: delivery
+    healthcheck:
+      test: pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB
+      interval: 10s
+      timeout: 5s
+      start_period: 10s
+      retries: 5

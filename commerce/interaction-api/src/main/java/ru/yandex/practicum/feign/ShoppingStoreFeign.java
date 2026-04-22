@@ -2,6 +2,8 @@ package ru.yandex.practicum.feign;
 
 import feign.FeignException;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
@@ -10,6 +12,7 @@ import ru.yandex.practicum.store.dto.ProductDto;
 import ru.yandex.practicum.store.dto.SetProductQuantityState;
 import ru.yandex.practicum.store.enums.ProductCategory;
 
+import java.util.List;
 import java.util.UUID;
 
 @FeignClient(name = "shopping-store", path = "/api/v1/shopping-store",
@@ -35,4 +38,7 @@ public interface ShoppingStoreFeign {
 
     @PostMapping("/quantityState")
     Boolean setProductQuantityState(@Valid SetProductQuantityState request) throws FeignException;
+
+    @GetMapping("/ids")
+    List<ProductDto> getProductsById(@NotNull @NotEmpty @RequestBody List<UUID> productIds) throws FeignException;
 }
